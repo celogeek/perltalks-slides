@@ -1,0 +1,3 @@
+[submodule "html5slides-uulm"]
+	path = html5slides-uulm
+	url = https://github.com/berb/html5slides-uulm.git
