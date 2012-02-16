@@ -1,17 +1,5 @@
 <!DOCTYPE html>
 
-<!-- SLIDE System made by :
-  Google HTML5 slide template
-
-  Authors: Luke Mahé (code)
-           Marcin Wichary (code and design)
-           
-           Dominic Mazzoni (browser compatibility)
-           Charles Chen (ChromeVox support)
-
-  URL: http://code.google.com/p/html5slides/
-  -->
-
 <!-- SLIDE
     Parallel::ForkManager
 
@@ -23,266 +11,327 @@
 <html>
   <head>
     <title>Slide Parallel::ForkManager</title>
-    <meta charset='utf-8'/>
-    <script src='../../../lib/slides.js'></script>
-    <link rel="icon" type="image/png" href="../../../images/logo.png" />
+	<link href="lib/styles.css" media="screen" rel="stylesheet" type="text/css" />
+	<link href="lib/uulm/uulm.css" media="screen" rel="stylesheet" type="text/css" />
+	<meta charset='utf-8'>
+	<script src='lib/slides.js'></script>
   </head>
   
   <style>
-      .slides.template-default > article:not(.nobackground):not(.biglogo) {
+      .slides.template-uulm-in section > article {
           background: url(images/logo_100x100_idx.png) 710px 625px no-repeat !important;
           background-position: right bottom !important;
           background-color: white !important;
       }
-      .slides.template-default article.biglogo {
-          background: white 50% 50% no-repeat !important;
-      }
-      .slides.template-default article p.smaller,span.smaller {
+      .slides.templace-uuml-in section > article p.smaller,span.smaller {
           font-size: 20px;
           line-height: 24px;
           letter-spacing: 0;
       }
+      h1.upper {
+          margin-top: 100px !important;
+      }
       div.centered, ul.centered {
           padding-top: 150px;
       }
-      .slides.template-default article.biglogo li::before {
-          content: '' !important;
+      ul.pure li::before {
+          content: '';
       }
-
   </style>
 
   <body style='display: none'>
 
-    <section class='slides layout-widescreen template-default'>
-    <article class='smaller'>
-    <h3>HTML5 Slides - Instructions for presenting :</h3>
-    <br/>
-    <div>
-        <p>Press Enter, space, right arrow to advance; Backspace, left arrow to go back.</p>
-        <p>On mobile, just swype your finger from right to left</p>
-        <p>Enter full-screen mode (F11 or Shift-Command-F) before presenting.</p>
-        <p>Adjust to your screen by zooming (CTRL + '+' / CTRL + '-')</p>
-        <p>You should be able to press Ctrl+R/F5 at any time to refresh without losing your place in the presentation.</p>
-        <p>If an iframe steals your focus and you can’t advance any more, please click outside the slide on the background to give the focus back to the presentation.</p>
-        <p>Enjoy !</p>
-    </div>
-    </article>
-    <article>
-        <h1>
-            Parallel::ForkManager
-        </h1>
-        <p>
-            Geistteufel
-        <span class="smaller">
-        (aka celogeek)
-        </span>
-            <br/>
-            Jan 18, 2011
-        </p>
-	<p>
-		Slides made for "Mongueurs of Paris" show
-	</p>
-    </article>
+	<div class='slides layout-widescreen template-uulm-in'>
+        <section>
+			<article class='smaller'>
+				<h3>Cheat Sheet – Shortcuts (incl. presenter mode)</h3>
 
-    <article>
-    <h1>
-        What is Parallel::ForkManager ?
-    </h1>
-    </article>
-    <article>
-        <q>It's a simple parallel processing fork manager</q>
-        <div class="author">
-          dLux (Szabó, Balázs)
-        </div>
-    </article>
+				<table>
+					<tr>
+						<th>Key</th>
+						<th>Function</th>
+					</tr>
+					<tr>
+						<td>enter/space/right arrow</td>
+						<td>advance</td>
+					</tr>
+					<tr>
+						<td>backspace/left arrow</td>
+						<td>go back</td>
+					</tr>
+					<tr>
+						<td>g</td>
+						<td>prompt: go to slide</td>
+					</tr>
+					<tr>
+						<td>home/pos1</td>
+						<td>jump to start slide</td>
+					</tr>
+					<tr>
+						<td>end</td>
+						<td>jump to end slide</td>
+					</tr>
+					<tr>
+						<td>shift +/-</td>
+						<td>zoom in/out</td>
+					</tr>
+					<tr>
+						<td>F11</td>
+						<td>fullscreen mode</td>
+					</tr>
+					<tr>
+						<td>n</td>
+						<td>show/hide presenter notes</td>
+					</tr>
+					<tr>
+						<td>t</td>
+						<td>toggle transitions</td>
+					</tr>
+					<tr>
+						<td>p</td>
+						<td>open presenter frame</td>
+					</tr>
+					<tr>
+						<td>.</td>
+						<td>sneak forward in presenter frame</td>
+					</tr>
+					<tr>
+						<td>,</td>
+						<td>sneak backward in presenter frame</td>
+					</tr>
+				</table>
+			</article>
+            <article>
+                <h1 class="upper">
+                    Parallel::ForkManager
+                </h1>
+                <p>
+                    Geistteufel
+                    <span class="smaller">(aka celogeek)</span><br/>
+                    Feb 17, 2012<br/>
+                </p>
+                <p>
+                    Slides made for "Mongueurs of Paris" show
+                </p>
+            </article>
 
-    <article>
-    <h1>
-        What can you do with Parallel::ForkManager ?
-    </h1>
-    </article>
-    <article>
-    <ul class="centered">
-        <li>Process faster a high amount of simple job</li>
-        <li>Use the maximum ressource of your server</li>
-        <li>Reduce your process time</li>
-    </ul>
-    </article>
-    <article>
-    <h1>How to do that efficiently ?</h1>
-    </article>
-    <article>
-    <div class="centered">
-        <p>I will show you cases of usage, it could be usefull for everyday usage.</p>
-    </div>
-    </article>
-    <article>
-        <h2>Case 1</h2>
-        <div class="build centered">
-            <p>Transform a simple process into a multi-process with Parallel::ForkManager</p>
-        </div>
-    </article>
+            <article>
+                <h3>Contents</h3>
+                <nav class="toc" />
+            </article>
+        </section>
+        <section>
+            <header>Presentation</header>
+            <article>
+            <h1>
+                What is Parallel::ForkManager ?
+            </h1>
+            </article>
+            <article>
+                <q>It's a simple parallel processing fork manager</q>
+                <div class="author">
+                  dLux (Szabó, Balázs)
+                </div>
+            </article>
 
+            <article>
+            <h1>
+                What can you do with Parallel::ForkManager ?
+            </h1>
+            </article>
+            <article>
+            <ul class="centered">
+                <li>Process faster a high amount of simple job</li>
+                <li>Use the maximum ressource of your server</li>
+                <li>Reduce your process time</li>
+            </ul>
+            </article>
+            <article>
+                <h1>How to do that efficiently ?</h1>
+            </article>
+            <article>
+                <div class="centered">
+                    <p>I will show you cases of usage, it could be usefull for everyday usage.</p>
+                </div>
+            </article>
+        </section>
+        <section>
+            <header>Case 1: Transform a simple process into multi-process</header>
+            <article>
+                <h2>Case 1</h2>
+                <div class="build centered">
+                    <p>Transform a simple process into a multi-process with Parallel::ForkManager</p>
+                </div>
+            </article>
+            <article>
+                <h3>This is your code:</h3>
+                <pre>
+for my $job(@jobs) {
+    compute_this_job($job);
+}
+</pre>
+            </article>
+            <article>
+                <h3>This is with Parallel::ForkManager</h3>
+                <pre>
+use Parallel::ForkManager;
+my $MAX_PROCESS = 4; #number of your CPUs for example
+my $pfm = Parallel::ForkManager->new($MAX_PROCESS);
+for my $job(@jobs) {
+    $pfm->start and next;
+    compute_this_job($job);
+    $pfm->finish;
+}
+$pfm->wait_all_children;
+</pre>
+            </article>
+            <article>
+                <h1>Simple ? Yeah, let's do a bit more</h1>
+            </article>
+        </section>
+        <section>
+            <header>Case 2: Get back result from your fork</header>
+            <article>
+                <h2>Case 2</h2>
+                <div class="build centered">
+                    <p>Compute your job and return the result to the parent to do furthermore</p>
+                </div>
+            </article>
+            <article>
+                <h3>run_on_finish method:</h3>
+                <pre>
+my $pfm = p_fork; #return a Parallel::ForkManager instance
+my $result = {};
+$pm->run_on_finish(sub {
+    my ($pid, $exit, $id, $exit_signal, $core_dump, $data) = @_;
+    croak "Failed to process on one job, stop here !" 
+        if $exit || $exit_signal;
+    $result->{$id} = $data;
+});
+for my $job(@jobs) {
+    $pfm->start($job->{id}) and next;
+    my $job_result = compute_this_job($job);
+    my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
+    $pfm->finish($job_error, $job_result);
+}
+$pfm->wait_all_children;
+do_more_stuff_with($result);
+</pre>
+            </article>
+            <article>
+                <h1>Great ! I want database connection now !</h1>
+            </article>
+        </section>
+        <section>
+            <header>Case 3: Handle DBI connexion</header>
+            <article>
+                <h2>Case 3</h2>
+                <div class="build centered">
+                    <p>Issue with DBI and how to handle it !</p>
+                </div>
+            </article>
+            <article>
+                <h3>Parent lose connection if sons use it :</h3>
+                <div class="build centered">
+                    <p>If you use the parent connection in a fork, <br/>your SQL server will close the parent one.</p>
+                </div>
+            </article>
+            <article>
+            <h1>What can I do if I need it in the parent and sons ?</h1>
+            </article>
+            <article>
+                <h3>Solution :</h3>
+                <div class="build centered">
+                    <p>Directly remove the parent connection just after a fork.</p>
+                    <p>Connect the son with a fresh connection.</p>
+                </div>
+            </article>
+            <article>
+                <h3>Missing to remove connection disconnect the parent:</h3>
+                <div class="build centered">
+                    <p>If you forget to remove the parent connection in sons, the autodestroy of Perl will call the DBI autodestroy which close the parent connection.</p>
+                </div>
+            </article>
+            <article>
+                <h3>Solution:</h3>
+                <div class="build centered">
+                    <p>Directly remove the parent connection just after a fork.</p>
+                </div>
+            </article>
+            <article>
+                <h3>Let's see an example: (sons don't need connection)</h3>
+                <pre>
+my ($pfm, $MAX_PROCESS) = p_fork; #return a Parallel::ForkManager instance
+my $result = {};
+#here the run_on_finish stuff
+my $conn = get_my_dbi_connection();
+$conn->prepare("SQL to fetch stuff");
+$conn->execute;
+while(my $job = $conn->fetchrow_hashref) {
+    $pfm->start($job->{id}) and next;
+    my $job_result = compute_this_job($job);
+    my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
+    $pfm->finish($job_error, $job_result);
+}
+$pfm->wait_all_children;
+$conn->finish;
+do_more_stuff_with($result);
+</pre>
+                <div class="build">
+                    <p>You will loose your parent connection.</p>
+                </div>
+            </article>
+            <article>
+                <h3>Let's see how to remove properly the parent connection:</h3>
+                <pre>
+#...
+$pfm->start($job->{id}) and next;
+if ($MAX_PROCESS) { #if we have fork
+    $conn->{InactiveDestroy} = 1;
+    $conn = undef;
+}
+#connection is useless, 
+#autodestroy of DBI is call
+#InactiveDestroy is made for Fork, 
+#and let the connection intact
+</pre>
+            </article>
+            <article>
+                <h3>If you need a connection, just do this:</h3>
+                <pre>
+#...
+$pfm->start($job->{id}) and next;
+if ($MAX_PROCESS) { #if we have fork
+    $conn->{InactiveDestroy} = 1;
+    $conn = get_my_new_dbi_connection();
+}
+#autodestroy of DBI is call for previous connection
+</pre>
+            </article>
+            <article>
+            <h1>Great ! Now how to handle my ressource properly ?</h1>
+            </article>
+        </section>
+        <section>
+            <header>Case 4: Compute the MAX_PROCESS to use efficiently ressources</header>
+            <article>
+                <h2>Case 4</h2>
+                <div class="build centered">
+                    <p>Why and how to compute MAX_PROCESS properly ?</p>
+                </div>
+            </article>
 
-    <article>
-    <h3>This is your code:</h3>
-    <pre>
-    for my $job(@jobs) {
-        compute_this_job($job);
-    }
-    </pre>
-    </article>
-    <article>
-    <h3>This is with Parallel::ForkManager</h3>
-    <pre>
-    use Parallel::ForkManager;
-    my $MAX_PROCESS = 4; #number of your CPUs for example
-    my $pfm = Parallel::ForkManager->new($MAX_PROCESS);
-    for my $job(@jobs) {
-        $pfm->start and next;
-        compute_this_job($job);
-        $pfm->finish;
-    }
-    $pfm->wait_all_children;
-    </pre>
-    </article>
-    <article>
-    <h1>Simple ? Yeah, let's do a bit more</h1>
-    </article>
-    <article>
-        <h2>Case 2</h2>
-        <div class="build centered">
-            <p>Compute your job and return the result to the parent to do furthermore</p>
-        </div>
-    </article>
-    <article class="smaller">
-        <h3>run_on_finish method:</h3>
-        <pre>
-        my $pfm = p_fork; #return a Parallel::ForkManager instance
-        my $result = {};
-        $pm->run_on_finish(sub {
-            my ($pid, $exit, $id, $exit_signal, $core_dump, $data) = @_;
-            croak "Failed to process on one job, stop here !" 
-                if $exit || $exit_signal;
-            $result->{$id} = $data;
-        });
-        for my $job(@jobs) {
-            $pfm->start($job->{id}) and next;
-            my $job_result = compute_this_job($job);
-            my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
-            $pfm->finish($job_error, $job_result);
-        }
-        $pfm->wait_all_children;
-        do_more_stuff_with($result);
-        </pre>
-    </article>
-    <article>
-        <h1>Great ! I want database connection now !</h1>
-    </article>
-    <article>
-        <h2>Case 3</h2>
-        <div class="build centered">
-            <p>Issue with DBI and how to handle it !</p>
-        </div>
-    </article>
-    <article>
-        <h3>Parent lose connection if sons use it :</h3>
-        <div class="build centered">
-            <p>If you use the parent connection in a fork, <br/>your SQL server will close the parent one.</p>
-        </div>
-    </article>
-    <article>
-    <h1>What can I do if I need it in the parent and sons ?</h1>
-    </article>
-    <article>
-        <h3>Solution :</h3>
-        <div class="build centered">
-            <p>Directly remove the parent connection just after a fork.</p>
-            <p>Connect the son with a fresh connection.</p>
-        </div>
-    </article>
-    <article>
-        <h3>Missing to remove connection disconnect the parent:</h3>
-        <div class="build centered">
-            <p>If you forget to remove the parent connection in sons, the autodestroy of Perl will call the DBI autodestroy which close the parent connection.</p>
-        </div>
-    </article>
-    <article>
-        <h3>Solution:</h3>
-        <div class="build centered">
-            <p>Directly remove the parent connection just after a fork.</p>
-        </div>
-    </article>
-    <article>
-        <h3>Let's see an example: (sons don't need connection)</h3>
-        <pre>
-        my $pfm = p_fork; #return a Parallel::ForkManager instance
-        my $result = {};
-        #here the run_on_finish stuff
-        my $conn = get_my_dbi_connection();
-        $conn->prepare("SQL to fetch stuff");
-        $conn->execute;
-        while(my $job = $conn->fetchrow_hashref) {
-            $pfm->start($job->{id}) and next;
-            my $job_result = compute_this_job($job);
-            my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
-            $pfm->finish($job_error, $job_result);
-        }
-        $pfm->wait_all_children;
-        $conn->finish;
-        do_more_stuff_with($result);
-        </pre>
-        <div class="build">
-            <p>You will loose your parent connection.</p>
-        </div>
-    </article>
-    <article>
-        <h3>Let's see how to remove properly the parent connection:</h3>
-        <pre>
-            #...
-            $pfm->start($job->{id}) and next;
-            $conn->{InactiveDestroy} = 1;
-            $conn = undef;
-            #connection is useless, 
-            #autodestroy of DBI is call
-            #InactiveDestroy is made for Fork, 
-            #and let the connection intact
-        </pre>
-    </article>
-    <article>
-        <h3>If you need a connection, just do this:</h3>
-        <pre>
-            #...
-            $pfm->start($job->{id}) and next;
-            $conn->{InactiveDestroy} = 1;
-            $conn = get_my_new_dbi_connection();
-            #autodestroy of DBI is call for previous connection
-            #InactiveDestroy is made for Fork, 
-            #and let the connection intact
-        </pre>
-    </article>
-    <article>
-    <h1>Great ! Now how to handle my ressource properly ?</h1>
-    </article>
+            <article>
+                <h3>Why ?</h3>
+                <div class="build centered">
+                    <p>You want to use all your CPU</p>
+                    <p>You want to avoid swapping, because it could lead to an out of memory or slow down your process</p>
+                </div>
+            </article>
 
-    <article>
-        <h2>Case 4</h2>
-        <div class="build centered">
-            <p>Why and how to compute MAX_PROCESS properly ?</p>
-        </div>
-    </article>
-
-    <article>
-        <h3>Why ?</h3>
-        <div class="build centered">
-            <p>You want to use all your CPU</p>
-            <p>You want to avoid swapping, because it could lead to an out of memory or slow down your process</p>
-        </div>
-    </article>
-
-    <article class="smaller">
-        <h3>How ?</h3>
-    <pre>
+            <article>
+                <h3>How ?</h3>
+                <pre>
 use strict; use warnings;
 use Parallel::ForkManager;
 use Sys::Info; use Sys::Statistics::Linux::MemStats;
@@ -297,79 +346,92 @@ sub p_fork {
     my $MAX_PROCESSES_FOR_CPU = $cpu->count || 1;
     # get real free mem in KB
     my $freemem = Sys::Statistics::Linux::MemStats->new->get->{realfree};
-    my $MAX_PROCESSES_FOR_MEM = int($freemem / ($min_mem)); # 3GB by fork max
-    # get the min between cpu and memory slot, 1 fork minimum
-    my $MAX_PROCESSES = max(1, min($MAX_PROCESSES_FOR_CPU, $MAX_PROCESSES_FOR_MEM));
+</pre>
+                </article>
+                <article>
+<pre>
+    # 3GB by fork max
+    my $MAX_PROCESSES_FOR_MEM = int($freemem / ($min_mem));
+    # get the min between cpu and memory slot, 
+    # 0 mean no fork because not enough memory
+    my $MAX_PROCESSES = 
+          min($MAX_PROCESSES_FOR_CPU, $MAX_PROCESSES_FOR_MEM);
     # return the process, ready to use
     my $pm = new Parallel::ForkManager($MAX_PROCESSES);
     wantarray and return ($pm, $MAX_PROCESSES) or return $pm;
 }
-    </pre>
-    </article>
+</pre>
+            </article>
+        </section>
+        <section>
+            <header>Warning !</header>
+            <article>
+                <h1 class="red">!!! WARNING !!!</h1>
+            </article>
+            <article>
+                <h3 class="red">Don't fork if your job is too short :</h3>
+                <div class="build centered">
+                    <p>Fork is time and memory consuming.</p>
+                    <p>If your job take less a second, regroup many jobs together and fork once.</p>
+                </div>
+            </article>
+            
+            <article>
+                <h3>Let's see an example:</h3>
+                <pre>
+#return a Parallel::ForkManager instance
+my ($pfm,$MAX_PROCESS) = p_fork;
+my $result = {};
+#here the run_on_finish stuff
+my $conn = get_my_dbi_connection();
+$conn->prepare("SQL to fetch stuff"); $conn->execute;
+my @jobs = $conn->fetchall_arrayref; $conn->finish;
+my $step = max(50, @jobs / $MAX_PROCESS + 1); #min 50 job per pack
+for(my $job_start = 0; $job_start < @jobs, $job_start += $step) {
+    $pfm->start($job->{id}) and next;
+    if ($MAX_PROCESS) { #if we have fork
+        $conn->{InactiveDestroy} = 1; 
+        $conn = undef;
+    }
+</pre>
+            </article>
+            <article>
+<pre>
+    my $job_result = {};
+    for(my $job_current = $job_start; 
+            $job_current <= min(@jobs - 1,$job_start + $step); 
+            $job_current ++) { 
+        my $job = $jobs[$job_current];
+        my $job_result->{$job->{id}} = compute_this_job($job)
+        or croak "Error !";
+    }
+    $pfm->finish(0, $job_result);
+}
+$pfm->wait_all_children;
+do_more_stuff_with($result);
+</pre>
+            </article>
+        </section>
+        <section>
+            <header>Thank you</header>
+            <article>
+                <h1 class="upper">
+                    Thank you!
+                </h1>
+                <p>
+                    Geistteufel
+                    <span class="smaller">(aka celogeek)</span><br/>
+                    Feb 17, 2012
+                </p>
 
-    <article>
-        <h1 class="red">!!! WARNING !!!</h1>
-    </article>
-    <article>
-        <h3 class="red">Don't fork if your job is too short :</h3>
-        <div class="build centered">
-            <p>Fork is time and memory consuming.</p>
-            <p>If your job take less a second, regroup many jobs together and fork once.</p>
-        </div>
-    </article>
-    
-    <article class="smaller">
-        <h3>Let's see an example:</h3>
-        <pre>
-        my ($pfm,$MAX_PROCESS) = p_fork; #return a Parallel::ForkManager instance
-        my $result = {};
-        #here the run_on_finish stuff
-        my $conn = get_my_dbi_connection();
-        $conn->prepare("SQL to fetch stuff"); $conn->execute;
-        my @jobs = $conn->fetchall_arrayref; $conn->finish;
-        my $step = max(50, @jobs / $MAX_PROCESS + 1); #min 50 job per pack
-        for(my $job_start = 0; $job_start < @jobs, $job_start += $step) {
-            $pfm->start($job->{id}) and next;
-            $conn->{InactiveDestroy} = 1; $conn = undef;
-            my $job_result = {};
-            for(my $job_current = $job_start; 
-                    $job_current <= min(@jobs - 1,$job_start + $step); 
-                    $job_current ++) { 
-                my $job = $jobs[$job_current];
-                my $job_result->{$job->{id}} = compute_this_job($job)
-                or croak "Error !";
-            }
-            $pfm->finish(0, $job_result);
-        }
-        $pfm->wait_all_children;
-        do_more_stuff_with($result);
-        </pre>
-    </article>
+                <ul class="pure">
+                    <li><a href="http://sck.to/SM" target=_blank>http://www.mongueurs.net/<img src="images/logo_100x100_idx.png" style="margin-left: 20px; vertical-align:middle;"></a></li>
+                    <li><a href="http://sck.to/BV" target=_blank>http://qa.celogeek.com/programming/perl/talks/slides<img src="../../../images/logo.png" style="margin-left: 20px; vertical-align:middle;"></a></li>
+                </ul>
+            </article>
 
-    <article class="biglogo">
-        <h1>
-            Thank you!
-        </h1>
-        <p>
-            Geistteufel
-        <span class="smaller">
-        (aka celogeek)
-        </span>
-            <br/>
-            Jan 18, 2011
-        </p>
-
-        <ul style="
-            li::before {
-            content: '';
-            }
-            ">
-            <li><a href="http://sck.to/SM">http://www.mongueurs.net/<img src="images/logo_100x100_idx.png" style="margin-left: 20px; vertical-align:middle;"></a></li>
-            <li><a href="http://sck.to/BV">http://qa.celogeek.com/programming/perl/talks/slides<img src="../../../images/logo.png" style="margin-left: 20px; vertical-align:middle;"></a></li>
-        </ul>
-    </article>
-
-    </section>
+        </section>
+    </div>
 
     <!-- Piwik --> 
     <script type="text/javascript">
