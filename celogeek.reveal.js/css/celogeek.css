@@ -1,0 +1,52 @@
+#reveal.celogeek div.centered {
+    margin-top: 12%;
+}
+
+#reveal.celogeek section > section {
+    margin-top: 12%;
+}
+
+#reveal.celogeek p.author {
+    display: block;
+    position: relative;
+    width: 70%;
+    margin: 5px auto;
+    padding: 5px;
+    text-align: right;
+    font-size: 80%;
+
+    font-style: italic;
+}
+
+#reveal.celogeek pre {
+	font-size: 18px;
+}
+
+#reveal.celogeek a,
+#reveal.celogeek a:hover,
+#reveal.celogeek .controls a.enabled {
+	color: #D70606;
+}
+
+#reveal.celogeek .progress span,
+#reveal.celogeek .roll span:after {
+	background: #D70606;
+}
+
+#reveal.celogeek a.image:hover img {
+	border-color: #D70606;
+}
+
+#reveal.celogeek section img {
+	border: 0px;
+}
+
+#reveal.celogeek section ul.thankyou li a {
+    font-size: 24px;
+}
+#reveal.celogeek section ul.thankyou li img {
+    vertical-align: middle;
+    margin-left: 20px;
+    width: 50px;
+    height: 50px;
+}

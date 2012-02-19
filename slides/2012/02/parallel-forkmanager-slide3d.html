@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		
+        <title>Slides3D Parallel::ForkManager</title>
+
+		<meta name="description" content="A use cases for perl module Parallel::ForkManager">
+		<meta name="author" content="Geistteufel San">
+
+		<link href='http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/main.css">
+		<link rel="stylesheet" href="css/zenburn.css">
+		<link rel="stylesheet" href="css/celogeek.css">
+		
+	</head>
+
+  <body>
+
+	<div id="reveal">
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1>
+                    Parallel::ForkManager
+                </h1>
+                <script>
+                    // Delicously hacky. Look away.
+                    if( navigator.userAgent.match( /(iPhone|iPad|iPod|Android)/i ) )
+                    document.write( '<p style="color: rgba(0,0,0,0.3); text-shadow: none;">('+'Tap to navigate'+')</p>' );
+                </script>
+                <h3>
+                    Geistteufel (aka celogeek)
+                </h3>
+                <p>
+                    Feb 17, 2012
+                </p>
+                <p>
+                    Slides made for "Mongueurs of Paris" show
+                </p>
+                <p>&nbsp;</p>
+            </section>
+
+            <section>
+                <h2>Instructions</h2>
+                <ul>
+                    <li>Press space to see the plan and space again to go the slide.</li>
+                    <li>Use arrow to move between slide (left, right, down, up).</li>
+                    <li>Click on the code area to zoom in, click again to zoom out.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>
+                    What is Parallel::ForkManager ?
+                </h2>
+                <div class="centered fragment">
+                    <blockquote>
+                        It's a simple parallel processing fork manager
+                    </blockquote>
+                    <p class="author">dLux (Szabó, Balázs)</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>
+                    What can you do with Parallel::ForkManager ?
+                </h2>
+                <div class="centered">
+                    <ul>
+                        <li class="fragment">Process faster a high amount of simple job</li>
+                        <li class="fragment">Use the maximum ressource of your server</li>
+                        <li class="fragment">Reduce your process time</li>
+                    </ul>
+                </div>
+            </section>
+            <section>
+                <h2>How to do that efficiently ?</h2>
+                <div class="fragment centered">
+                    <p>I will show you cases of usage, it could be usefull for everyday usage.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>Case N&deg;1</h2>
+                <section>
+                    <div>
+                        <p>Transform a simple process into a multi-process with Parallel::ForkManager</p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+
+                <section>
+                    <p>This is your code:</p>
+                    <pre><code>
+    for my $job(@jobs) {
+        compute_this_job($job);
+    }
+    </code></pre>
+                </section>
+                <section>
+                    <p>This is with Parallel::ForkManager</p>
+                    <pre><code>
+use Parallel::ForkManager;
+my $MAX_PROCESS = 4; #number of your CPUs for example
+my $pfm = Parallel::ForkManager->new($MAX_PROCESS);
+for my $job(@jobs) {
+    $pfm->start and next;
+    compute_this_job($job);
+    $pfm->finish;
+}
+$pfm->wait_all_children;
+</code></pre>
+                </section>
+                <section>
+                    <h3>Simple ? Yeah, let's do a bit more</h3>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Case N&deg;2</h2>
+                <section>
+                    <p>Compute your job and return the result to the parent to do furthermore</p>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                    <p>run_on_finish method:</p>
+                    <pre><code>
+my $pfm = p_fork; #return a Parallel::ForkManager instance
+my $result = {};
+$pm->run_on_finish(sub {
+    my ($pid, $exit, $id, $exit_signal, $core_dump, $data) = @_;
+    croak "Failed to process on one job, stop here !" 
+        if $exit || $exit_signal;
+    $result->{$id} = $data;
+});
+for my $job(@jobs) {
+    $pfm->start($job->{id}) and next;
+    my $job_result = compute_this_job($job);
+    my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
+    $pfm->finish($job_error, $job_result);
+}
+$pfm->wait_all_children;
+do_more_stuff_with($result);
+</code></pre>
+                </section>
+                <section>
+                    <h3>Great ! I want database connection now !</h3>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Case N&deg;3</h2>
+                <section>
+                    <p>Issue with DBI and how to handle it !</p>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <p>What kind of problem can I have with DBI and fork ?<p>
+                <ul>
+                    <li class="fragment">If you use the parent connection in a fork, your SQL server will close the parent one.</li>
+                    <li class="fragment">If you forget to remove the parent connection in sons, the autodestroy of Perl will call the DBI autodestroy which close the parent connection.</li>
+                </ul>
+                </section>
+                <section>
+                    <p>How can I solve this?</p>
+                    <ul>
+                        <li class="fragment">Directly remove the parent connection just after a fork.</li>
+                        <li class="fragment">Connect the son with a fresh connection if you need one.</li>
+                    </ul>
+                </section>
+                <section>
+                    <p>Let's see an example (sons don't need connection):</p>
+                <pre><code>
+#return a Parallel::ForkManager instance
+my ($pfm, $MAX_PROCESS) = p_fork;
+my $result = {};
+#here the run_on_finish stuff
+my $conn = get_my_dbi_connection();
+$conn->prepare("SQL to fetch stuff");
+$conn->execute;
+while(my $job = $conn->fetchrow_hashref) {
+    $pfm->start($job->{id}) and next;
+    my $job_result = compute_this_job($job);
+    my $job_error = ref $job_result eq 'HASH' ? 0 : 1;
+    $pfm->finish($job_error, $job_result);
+}
+$pfm->wait_all_children;
+$conn->finish;
+do_more_stuff_with($result);
+</code></pre>
+                    <div class="fragment">
+                        <p>You will loose your parent connection.</p>
+                    </div>
+                </section>
+                <section>
+                    <p>Let's see how to remove properly the parent connection:</p>
+                    <pre><code>
+#...
+$pfm->start($job->{id}) and next;
+if ($MAX_PROCESS) { #if we have fork
+    $conn->{InactiveDestroy} = 1;
+    $conn = undef;
+}
+#connection is useless, 
+#autodestroy of DBI is call
+#InactiveDestroy is made for Fork, 
+#and let the connection intact
+</code></pre>
+                </section>
+                <section>
+                    <p>If you need a connection, just do this:</p>
+                    <pre><code>
+#...
+$pfm->start($job->{id}) and next;
+if ($MAX_PROCESS) { #if we have fork
+    $conn->{InactiveDestroy} = 1;
+    $conn = get_my_new_dbi_connection();
+}
+#autodestroy of DBI is call for previous connection
+</code></pre>
+                </section>
+                <section>
+                    <h3>Great ! Now how to handle my ressources properly ?</h3>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+        </section>
+        <section>
+                <h2>Case N&deg;4</h2>
+                <section>
+                    <p>Compute MAX_PROCESS properly</p>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+
+                <section>
+                    <p>Why ?<p>
+                    <ul>
+                        <li class="fragment">You want to use all your CPU</li>
+                        <li class="fragment">You want to avoid swapping, because it could lead to an out of memory or slow down your process</li>
+                    </ul>
+                    <p>&nbsp;</p>
+                    <p class="fragment">Let see how to do this</p>
+                </section>
+
+                <section>
+                    <p>The p_fork method:</p>
+                    <pre><code>
+use strict; use warnings;
+use Parallel::ForkManager;
+use Sys::Info; use Sys::Statistics::Linux::MemStats;
+use 5.010; #for new feature
+sub p_fork {
+    #minimum require memory for your process
+    my ($min_mem) = @_; # default 1 Go
+    $min_mem //= 1024 ** 2; #1 GO => expr in Kb
+    # get number of cpus on the machine
+    my $cpu_info = Sys::Info->new;
+    my $cpu = $cpu_info->device('CPU');
+    my $MAX_PROCESSES_FOR_CPU = $cpu->count || 1;
+    # get real free mem in KB
+    my $freemem = Sys::Statistics::Linux::MemStats->new->get->{realfree};
+</code></pre>
+                </section>
+                <section>
+                    <pre><code>
+    # 3GB by fork max
+    my $MAX_PROCESSES_FOR_MEM = int($freemem / ($min_mem));
+    # get the min between cpu and memory slot, 
+    # 0 mean no fork because not enough memory
+    my $MAX_PROCESSES = 
+          min($MAX_PROCESSES_FOR_CPU, $MAX_PROCESSES_FOR_MEM);
+    # return the process, ready to use
+    my $pm = new Parallel::ForkManager($MAX_PROCESSES);
+    wantarray and return ($pm, $MAX_PROCESSES) or return $pm;
+}
+</code></pre>
+                </section>
+                <section>
+                    <h3>Well, we almost finish. Now you must be carefull.</h3>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Be carefull</h2>
+                <section>
+                    <p>Don't fork if your job is too short :</p>
+                    <ul>
+                        <li class="fragment">Fork is time and memory consuming.</li>
+                        <li class="fragment">If your job take less a second, regroup many jobs together and fork for computing them.</li>
+                    </ul>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                
+                <section>
+                    <h3>Let's see an example:</h3>
+                    <pre><code>
+#return a Parallel::ForkManager instance
+    my ($pfm,$MAX_PROCESS) = p_fork;
+    my $result = {};
+#here the run_on_finish stuff
+    my $conn = get_my_dbi_connection();
+    $conn->prepare("SQL to fetch stuff"); $conn->execute;
+    my @jobs = $conn->fetchall_arrayref; $conn->finish;
+    my $step = max(50, @jobs / $MAX_PROCESS + 1); #min 50 job per pack
+    for(my $job_start = 0; $job_start < @jobs, $job_start += $step) {
+        $pfm->start($job->{id}) and next;
+        if ($MAX_PROCESS) { #if we have fork
+            $conn->{InactiveDestroy} = 1; 
+            $conn = undef;
+        }
+    </code></pre>
+                </section>
+                <section>
+    <pre><code>
+        my $job_result = {};
+        for(my $job_current = $job_start; 
+                $job_current <= min(@jobs - 1,$job_start + $step); 
+                $job_current ++) { 
+            my $job = $jobs[$job_current];
+            my $job_result->{$job->{id}} = compute_this_job($job)
+            or croak "Error !";
+        }
+        $pfm->finish(0, $job_result);
+    }
+    $pfm->wait_all_children;
+    do_more_stuff_with($result);
+    </code></pre>
+                </section>
+                <section>
+                    <h3>We have finish !</h3>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Thank you!</h2>
+                <h3>
+                    Geistteufel (aka celogeek)
+                </h3>
+                <p>
+                    Feb 17, 2012
+                </p>
+
+                <ul class="thankyou">
+                    <li><a target="_blank" href="http://sck.to/SM">http://www.mongueurs.net/<img src="images/logo_100x100_idx.png"/></a></li>
+                    <li><a target="_blank" href="http://sck.to/BV">http://qa.celogeek.com/programming/perl/talks/slides<img src="images/logo.png"/></a></li>
+                </ul>
+            </section>
+        </div>
+        <!-- The navigational controls UI -->
+        <aside class="controls">
+            <a class="left" href="#">&#x25C4;</a>
+            <a class="right" href="#">&#x25BA;</a>
+            <a class="up" href="#">&#x25B2;</a>
+            <a class="down" href="#">&#x25BC;</a>
+        </aside>
+
+        <!-- Displays presentation progress, max value changes via JS to reflect # of slides -->
+        <div class="progress"><span></span></div>
+        
+    </div>
+		
+    <script src="js/reveal.js"></script>
+    <script src="js/zoom.js"></script>
+    <script src="js/highlight.js"></script>
+    <script>
+        // Parse the query string into a key/value object
+        var query = {};
+        location.search.replace( /[A-Z0-9]+?=(\w*)/gi, function(a) {
+            query[ a.split( '=' ).shift() ] = a.split( '=' ).pop();
+        } );
+
+        Reveal.initialize({
+            // Display controls in the bottom right corner
+            controls: true,
+
+            // Display a presentation progress bar
+            progress: true,
+
+            // If true; each slide will be pushed to the browser history
+            history: true,
+
+            // Flags if mouse wheel navigation should be enabled
+            mouseWheel: true,
+
+            // Apply a 3D roll to links on hover
+            rollingLinks: true,
+
+            // UI style
+            theme: query.theme || 'celogeek', // default/neon
+
+            // Transition style
+            transition: query.transition || 'default' // default/cube/page/concave/linear(2d)
+        });
+
+        hljs.initHighlightingOnLoad();
+
+        document.querySelector( '#reveal' ).addEventListener( 'click', function( event ) {
+            if (event.target.tagName == 'CODE') {
+                event.preventDefault();
+                zoom.magnify({ element: event.target });
+            }
+        } );
+    </script>
+
+    <!-- Piwik --> 
+    <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.celogeek.fr/" : "http://stats.celogeek.fr/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script type="text/javascript">
+        try {
+            var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 6);
+            piwikTracker.trackPageView();
+            piwikTracker.enableLinkTracking();
+        } catch( err ) {}
+    </script><noscript><p><img src="http://stats.celogeek.fr/piwik.php?idsite=6" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+  </body>
+</html>
