@@ -6,6 +6,10 @@
     margin-top: 12%;
 }
 
+#reveal.celogeek p.left {
+    text-align: left;
+}
+
 #reveal.celogeek p.author {
     display: block;
     position: relative;
