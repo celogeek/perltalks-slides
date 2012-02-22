@@ -162,18 +162,18 @@ do_more_stuff_with($result);
                 <p>What kind of problem can I have with DBI and fork ?<p>
                 <ul>
                     <li class="fragment">If you use the parent connection in a fork, your SQL server will close the parent one.</li>
-                    <li class="fragment">If you forget to remove the parent connection in sons, the autodestroy of Perl will call the DBI autodestroy which close the parent connection.</li>
+                    <li class="fragment">If you forget to remove the parent connection in children, the autodestroy of Perl will call the DBI autodestroy which close the parent connection.</li>
                 </ul>
                 </section>
                 <section>
                     <p>How can I solve this?</p>
                     <ul>
                         <li class="fragment">Directly remove the parent connection just after a fork.</li>
-                        <li class="fragment">Connect the son with a fresh connection if you need one.</li>
+                        <li class="fragment">Connect the child with a fresh connection if you need one.</li>
                     </ul>
                 </section>
                 <section>
-                    <p>Let's see an example (sons don't need connection):</p>
+                    <p>Let's see an example (children don't need connection):</p>
                 <pre><code>
 #return a Parallel::ForkManager instance
 my ($pfm, $MAX_PROCESS) = p_fork;
@@ -279,7 +279,7 @@ sub p_fork {
 </code></pre>
                 </section>
                 <section>
-                    <h3>Well, we almost finish. Now you must be carefull.</h3>
+                    <h3>Well, we have almost finished. Now you must be carefull.</h3>
                     <img src="images/arrow_right.gif"/>
                 </section>
             </section>
@@ -330,7 +330,7 @@ sub p_fork {
     </code></pre>
                 </section>
                 <section>
-                    <h3>We have finish !</h3>
+                    <h3>We have finished !</h3>
                     <img src="images/arrow_right.gif"/>
                 </section>
             </section>
