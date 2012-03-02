@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		
+        <title>Slides3D Command Line Tools In Style</title>
+
+		<meta name="description" content="How to modernize the command line tool with perl">
+		<meta name="author" content="Geistteufel San">
+
+		<link rel="stylesheet" href="css/lato.css" type="text/css">
+		<link rel="stylesheet" href="css/reset.css" type="text/css">
+		<link rel="stylesheet" href="css/main.css" type="text/css">
+		<link rel="stylesheet" href="css/zenburn.css" type="text/css">
+		<link rel="stylesheet" href="css/celogeek.css" type="text/css">
+		
+	</head>
+
+  <body>
+
+	<div id="reveal">
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1>
+                    Command line tools in style
+                </h1>
+                <script>
+                    // Delicously hacky. Look away.
+                    if( navigator.userAgent.match( /(iPhone|iPad|iPod|Android)/i ) )
+                    document.write( '<p style="color: rgba(0,0,0,0.3); text-shadow: none;">('+'Tap to navigate'+')</p>' );
+                </script>
+                <h3>
+                    Geistteufel (aka celogeek)
+                </h3>
+                <p>
+                    Mar 4, 2012
+                </p>
+                <p>
+                    Slides made for "Mongers of Paris" show
+                </p>
+                <p>&nbsp;</p>
+            </section>
+
+            <section>
+                <h2>Instructions</h2>
+                <ul>
+                    <li>Press space to see the plan and space again to go the slide.</li>
+                    <li>Use arrow to move between slide (left, right, down, up).</li>
+                    <li>Click on the code area to zoom in, click again to zoom out.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>
+                    Perl, a good language to create command line tools
+                </h2>
+                <div class="centered">
+                    In Perl, it's really easy to create a command line tool.
+                </div>
+            </section>
+            <section>
+                <h3>
+                    Example 1: old way to do wrapper to mysql tool
+                </h3>
+                <section>
+                    <div>
+                        <p>Let's see a simple tool that execute stuff with mysql command line.</p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <p>Display databases</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+
+my $mysql = `which mysql`; chomp $mysql;
+my $cmd = "$mysql -BNe 'show databases'";
+open F, $cmd."|";
+while(<F>) {
+        print;
+}
+close;
+</code></pre>
+                </section>
+                <section>
+                    <p>We need login/password</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+
+my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
+
+my $mysql = `which mysql`; chomp $mysql;
+my $cmd = "$mysql -BNe 'show databases'";
+$cmd .= " -u'$user'" if defined $user;
+$cmd .= " -p'$passwd'" if defined $passwd;
+
+print "Launch: $cmd\n";
+open F, $cmd."|";
+while(<F>) {
+        print;
+}
+close;
+#launch with mywrapper.pl LOGIN,PASSWD
+</code></pre>
+                </section>
+                <section>
+                    <p>Add a filter</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+
+my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
+my $filter = $ARGV[1] if @ARGV > 1;
+
+my $mysql = `which mysql`; chomp $mysql;
+my $cmd = "$mysql -BNe 'show databases'";
+$cmd .= " -u'$user'" if defined $user;
+$cmd .= " -p'$passwd'" if defined $passwd;
+
+print "Launch: $cmd\n";
+print "Apply filter: $filter\n" if defined $filter;
+open F, $cmd."|";
+while(<F>) {
+        defined $filter and (/$filter/ or next);
+            print;
+}
+close;
+#Launch with mywrapper.pl LOGIN,PASSWD FILTER
+</code></pre>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            It's quite easy but hard to maintain when you got ton of options.
+                            We need something better, something that handle the options.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+
+            <section>
+                <h3>
+                    Example 2: Getopt::Long::Descriptive
+                </h3>
+                <section>
+                    <div>
+                        <p>
+                            Extended processing of command line options.
+                            This module simplify the creation of tools in Perl.
+                        </p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                    <p>Now use the module in our example</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+use Getopt::Long::Descriptive;
+
+my ($opt, $usage) = describe_options(
+    "$0 %o",
+    ["user|u=s", "user auth"],
+    ["passwd|p=s", "passwd auth"],
+    ["filter|f=s", "db filter"],
+    ["help|h", "this help"],
+);
+print($usage->text), exit if $opt->help;
+
+my ($user, $passwd, $filter) = ($opt->user, $opt->passwd, $opt->filter);
+
+#same as before
+</pre></code>
+                </section>
+                <section>
+                    <p>
+                        Now we got this :
+                    </p>
+<pre><code>
+$ perl mywrapper.pl -h
+mywrapperl.pl [-fhpu] [long options...]
+	-u --user       user auth
+	-p --passwd     passwd auth
+	-f --filter     db filter
+	-h --help       this help
+</code></pre>
+                </section>
+                <section>
+                    <p>
+                        Test it with args:
+                    </p>
+<pre><code>
+$ perl mywrapper.pl -u root -f ^t
+Launch: /usr/local/bin/mysql -BNe 'show databases' -u'root'
+Apply filter: ^t
+test
+</code></pre>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            Pretty better, let's do it with an object.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Example 3: use object to do the stuff.</h2>
+                <section>
+                    <div>
+                        <p>Object can be use to keep stuff, and better structure your program.</p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <p>The MyWrapper.pm, a package to handle your tool.</p>
+<pre><code>
+package MyWrapper;
+use strict;
+use warnings;
+
+sub new {
+    my ($proto, %params) = @_; my $class = ref $proto || $proto;
+    my $self = \%params;
+    $self->{mysql} //= `which mysql`; chomp $self->{mysql};
+
+    bless $self, $class;
+}
+
+sub mysql {
+    my ($self, $mysql) = @_;
+    $self->{mysql} = $mysql if @_ > 1;
+    return $self->{mysql};
+}
+</code></pre>
+                </section>
+                <section>
+<pre><code>
+sub user {
+    my ($self, $user) = @_;
+    $self->{user} = $user if @_ > 1;
+    return $self->{user};
+}
+
+sub passwd {
+    my ($self, $passwd) = @_;
+    $self->{passwd} = $passwd if @_ > 1;
+    return $self->{passwd};
+}
+
+sub filter {
+    my ($self, $filter) = @_;
+    $self->{filter} = $filter if @_ > 1;
+    return $self->{filter};
+}
+</code></pre>
+                </section>
+                <section>
+<pre><code>
+sub run {
+    my ($self) = @_;
+
+    my $mysql = $self->mysql;
+    my $user = $self->user;
+    my $passwd = $self->passwd;
+    my $filter = $self->filter;
+
+    my $cmd = "$mysql -BNe 'show databases'";
+    $cmd .= " -u'$user'" if defined $user;
+    $cmd .= " -p'$passwd'" if defined $passwd;
+
+    print "Launch: $cmd\n";
+    print "Apply filter: $filter\n" if defined $filter;
+    open F, $cmd."|";
+    while(<F>) {
+        defined $filter and (/$filter/ or next);
+        print;
+    }
+    close;
+}
+1;
+</code></pre>
+                </section>
+                <section>
+                <p>The tool now look like :</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+use MyWrapper;
+use Getopt::Long::Descriptive;
+
+my ($opt, $usage) = describe_options(
+    "$0 %o",
+    ["user|u=s", "user auth"],
+    ["passwd|p=s", "passwd auth"],
+    ["filter|f=s", "db filter"],
+    ["help|h", "this help"],
+);
+
+print($usage->text), exit if $opt->help;
+
+my $wrapper = MyWrapper->new(user => $opt->user, passwd => $opt->passwd, filter => $opt->filter);
+$wrapper->run();
+</code></pre>
+                </section>
+                <section>
+                <p>Let's run it :</p>
+<pre><code>
+$ perl MyWrapper.pl --user=root --filter=^t
+Launch: /usr/local/bin/mysql -BNe 'show databases' -u'root'
+Apply filter: ^t
+test
+</code></pre>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            Quite better, but a little bit long and complex.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+                
+            </section>
+            <section>
+                <h3>Example 4: use Moo to simplify the package.</h3>
+                <section>
+                    <div>
+                        <p>Moo is Minimalist Object Orientation.</p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                    <p>Our package MyWrapper.pm with Moo:</p>
+<pre><code>
+package MyWrapper;
+use strict;
+use warnings;
+use Moo;
+
+has 'mysql' => ( is => 'rw',
+default => sub {
+    my $mysql = `which mysql`; chomp $mysql;
+    return $mysql;
+}
+);
+has user => ( is => 'rw' );
+has 'passwd' => ( is => 'rw' );
+has 'filter' => ( is => 'rw' );
+
+#run method remain the same
+1;
+</code></pre>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            It's really simple now. But we can do more.
+                            Let's the module do everything.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h3>Example 5: MooX::Options, options with an object</h3>
+                <section>
+                    <div>
+                        <p>MooX::Options, add 'option' keyword for your object.</p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <p>Your MyWrapper.pm is still simple:</p>
+<pre><code>
+package MyWrapper;
+use strict;
+use warnings;
+use Moo;
+use MooX::Options;
+
+#note than I don't use option here, it is not available at command line
+has 'mysql' => ( is => 'rw',
+default => sub {
+    my $mysql = `which mysql`; chomp $mysql;
+    return $mysql;
+}
+);
+option user => ( is => 'rw', doc => 'user auth', format => 's' );
+option 'passwd' => ( is => 'rw', doc => 'passwd auth', format => 's' );
+option 'filter' => ( is => 'rw', doc => 'filter table', format => 's' );
+
+#run remain the same
+</code></pre>
+                </section>
+                <section>
+                <p>Your MyWrapper.pl is now really simpler:</p>
+<pre><code>
+#!/usr/bin/env perl 
+use strict;
+use warnings;
+use MyWrapper;
+my $wrapper = MyWrapper->new_with_options();
+$wrapper->run();
+</code></pre>
+                </section>
+                <section>
+                <p>You got this, now :</p>
+<pre><code>
+$ perl MyWrapper.pl -h
+USAGE: MyWrapper.pl [-h] [long options...]
+	--user        user auth
+	--passwd      passwd auth
+	--filter      filter table
+	-h --help     show this help message
+</code></pre>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            Now you know how to do a command line tool in style.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h3>For Perl programmers</h3>
+                <section>
+                    <div>
+                        <p>
+                            Comparison between MooX::Options and MooseX::GetOpt
+                        </p>
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                    <p>Why should you prefer MooX::Options over MooseX::GetOpt ?</p>
+                    <ul>
+                        <li class="fragment">Moo::Options work with Mo/Moo/Mouse/Moose and any other kind of custom Perl Oriented Object you can make.</li>
+                        <li class="fragment">Moo::Options use special 'option' keyword instead of capturing all 'has' method to do a command line. If you have roles and many stuff with attributes, it became a nightmare to remove it from the scope of MooseX::GetOpt.</li>
+                        <li class="fragment">Moo::Options is very customizable and can adapted to any situation. You can change the 'option' keyword for example, or chain to something else than 'has'.</li>
+                    </ul>
+                </section>
+                <section>
+                    <div>
+                        <p>
+                            You've got the idea. Ok, it's finished now.
+                        </p>
+                    </div>
+                    <img src="images/arrow_right.gif"/>
+                </section>
+            </section>
+            <section>
+                <h2>Thank you!</h2>
+                <h3>
+                    Geistteufel (aka celogeek)
+                </h3>
+                <p>
+                    Mar 4, 2012
+                </p>
+
+                <ul class="thankyou">
+                    <li><a target="_blank" href="http://sck.to/SM">http://www.mongueurs.net/<img src="images/logo_100x100_idx.png"/></a></li>
+                    <li><a target="_blank" href="http://sck.to/BV">http://qa.celogeek.com/programming/perl/talks/slides<img src="images/logo.png"/></a></li>
+                </ul>
+            </section>
+        </div>
+        <!-- The navigational controls UI -->
+        <aside class="controls">
+            <a class="left" href="#">&#x25C4;</a>
+            <a class="right" href="#">&#x25BA;</a>
+            <a class="up" href="#">&#x25B2;</a>
+            <a class="down" href="#">&#x25BC;</a>
+        </aside>
+
+        <!-- Displays presentation progress, max value changes via JS to reflect # of slides -->
+        <div class="progress"><span></span></div>
+        
+    </div>
+		
+    <script src="js/reveal.js"></script>
+    <script src="js/zoom.js"></script>
+    <script src="js/highlight.js"></script>
+    <script>
+        // Parse the query string into a key/value object
+        var query = {};
+        location.search.replace( /[A-Z0-9]+?=(\w*)/gi, function(a) {
+            query[ a.split( '=' ).shift() ] = a.split( '=' ).pop();
+        } );
+
+        Reveal.initialize({
+            // Display controls in the bottom right corner
+            controls: true,
+
+            // Display a presentation progress bar
+            progress: true,
+
+            // If true; each slide will be pushed to the browser history
+            history: true,
+
+            // Flags if mouse wheel navigation should be enabled
+            mouseWheel: true,
+
+            // Apply a 3D roll to links on hover
+            rollingLinks: true,
+
+            // UI style
+            theme: query.theme || 'celogeek', // default/neon
+
+            // Transition style
+            transition: query.transition || 'default' // default/cube/page/concave/linear(2d)
+        });
+
+        hljs.initHighlightingOnLoad();
+
+        document.querySelector( '#reveal' ).addEventListener( 'click', function( event ) {
+            if (event.target.tagName == 'CODE') {
+                event.preventDefault();
+                zoom.magnify({ element: event.target });
+            }
+        } );
+    </script>
+
+    <!-- Piwik --> 
+    <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.celogeek.fr/" : "http://stats.celogeek.fr/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script type="text/javascript">
+        try {
+            var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 6);
+            piwikTracker.trackPageView();
+            piwikTracker.enableLinkTracking();
+        } catch( err ) {}
+    </script><noscript><p><img src="http://stats.celogeek.fr/piwik.php?idsite=6" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+  </body>
+</html>
