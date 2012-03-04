@@ -39,7 +39,7 @@
                     Mar 4, 2012
                 </p>
                 <p>
-                    Slides made for "Mongers of Paris" show
+                    Slides made for "French Perl Mongers" show
                 </p>
                 <p>&nbsp;</p>
             </section>
@@ -209,17 +209,17 @@ test
                 <section>
                     <div>
                         <p>
-                            Pretty better, let's do it with an object.
+                            Pretty better, let's do it with a class.
                         </p>
                     </div>
                     <img src="images/arrow_right.gif"/>
                 </section>
             </section>
             <section>
-                <h2>Example 3: use object to do the stuff.</h2>
+                <h2>Example 3: use a class to keep your params.</h2>
                 <section>
                     <div>
-                        <p>Object can be use to keep stuff, and better structure your program.</p>
+                        <p>It is better to use a class to store your params, it's easier to maintain.</p>
                     </div>
                     <img src="images/arrow_down.gif"/>
                 </section>
@@ -293,7 +293,7 @@ sub run {
 </code></pre>
                 </section>
                 <section>
-                <p>The tool now look like :</p>
+                <p>The tool now looks like :</p>
 <pre><code>
 #!/usr/bin/env perl 
 use strict;
@@ -350,15 +350,15 @@ use strict;
 use warnings;
 use Moo;
 
-has 'mysql' => ( is => 'rw',
+has mysql => ( is => 'rw',
 default => sub {
     my $mysql = `which mysql`; chomp $mysql;
     return $mysql;
 }
 );
 has user => ( is => 'rw' );
-has 'passwd' => ( is => 'rw' );
-has 'filter' => ( is => 'rw' );
+has passwd => ( is => 'rw' );
+has filter => ( is => 'rw' );
 
 #run method remain the same
 1;
@@ -368,7 +368,7 @@ has 'filter' => ( is => 'rw' );
                     <div>
                         <p>
                             It's really simple now. But we can do more.
-                            Let's the module do everything.
+                            Let's see a module that does everything.
                         </p>
                     </div>
                     <img src="images/arrow_right.gif"/>
@@ -392,15 +392,15 @@ use Moo;
 use MooX::Options;
 
 #note than I don't use option here, it is not available at command line
-has 'mysql' => ( is => 'rw',
+has mysql => ( is => 'rw',
 default => sub {
     my $mysql = `which mysql`; chomp $mysql;
     return $mysql;
 }
 );
 option user => ( is => 'rw', doc => 'user auth', format => 's' );
-option 'passwd' => ( is => 'rw', doc => 'passwd auth', format => 's' );
-option 'filter' => ( is => 'rw', doc => 'filter table', format => 's' );
+option passwd => ( is => 'rw', doc => 'passwd auth', format => 's' );
+option filter => ( is => 'rw', doc => 'filter table', format => 's' );
 
 #run remain the same
 </code></pre>
