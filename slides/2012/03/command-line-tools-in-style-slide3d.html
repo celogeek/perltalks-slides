@@ -78,10 +78,10 @@
 use strict;
 use warnings;
 
-my $cmd = "mysql -BNe 'show databases'";
-open my $f, $cmd."|";
-while(<$f>) {
-        print;
+my @cmd = ('mysql', '-BNe', 'show databases');
+open my $f, '-|', @cmd or die $cmd[0].' not found...';
+while(my $line = readline $f) {
+        print $line;
 }
 close $f;
 </code></pre>
@@ -95,14 +95,14 @@ use warnings;
 
 my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
 
-my $cmd = "mysql -BNe 'show databases'";
-$cmd .= " -u'$user'" if defined $user;
-$cmd .= " -p'$passwd'" if defined $passwd;
+my @cmd = ('mysql', '-BNe', 'show databases');
+push @cmd, "-u'$user'" if defined $user;
+push @cmd, "-p'$passwd'" if defined $passwd;
 
-print "Launch: $cmd\n";
-open my $f, $cmd."|";
-while(<$f>) {
-        print;
+print join(' ', "Launch:", @cmd)."\n";
+open my $f, '-|', @cmd or die $cmd[0].' not found...';
+while(my $line = readline $f) {
+        print $line;
 }
 close $f;
 #launch with mywrapper.pl LOGIN,PASSWD
@@ -118,16 +118,16 @@ use warnings;
 my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
 my $filter = $ARGV[1] if @ARGV > 1;
 
-my $cmd = "mysql -BNe 'show databases'";
-$cmd .= " -u'$user'" if defined $user;
-$cmd .= " -p'$passwd'" if defined $passwd;
+my @cmd = ('mysql', '-BNe', 'show databases');
+push @cmd, "-u'$user'" if defined $user;
+push @cmd, "-p'$passwd'" if defined $passwd;
 
-print "Launch: $cmd\n";
+print join(' ', "Launch:", @cmd)."\n";
 print "Apply filter: $filter\n" if defined $filter;
-open my $f, $cmd."|";
-while(<$f>) {
-        defined $filter and (/$filter/ or next);
-            print;
+open my $f, '-|', @cmd or die $cmd[0].' not found...';
+while(my $line = readline $f) {
+        next if(defined $filter && $line !~ /$filter/);
+        print $line;
 }
 close $f;
 #Launch with mywrapper.pl LOGIN,PASSWD FILTER
@@ -273,16 +273,16 @@ sub run {
     my $passwd = $self->passwd;
     my $filter = $self->filter;
 
-    my $cmd = "$mysql -BNe 'show databases'";
-    $cmd .= " -u'$user'" if defined $user;
-    $cmd .= " -p'$passwd'" if defined $passwd;
+    my @cmd = ('mysql', '-BNe', 'show databases');
+    push @cmd, "-u'$user'" if defined $user;
+    push @cmd, "-p'$passwd'" if defined $passwd;
 
-    print "Launch: $cmd\n";
+    print join(' ', "Launch:", @cmd)."\n";
     print "Apply filter: $filter\n" if defined $filter;
-    open my $f, $cmd."|";
-    while(<$f>) {
-        defined $filter and (/$filter/ or next);
-        print;
+    open my $f, '-|', @cmd or die $cmd[0].' not found...';
+    while(my $line = readline $f) {
+            next if(defined $filter && $line !~ /$filter/);
+            print $line;
     }
     close $f;
 }
