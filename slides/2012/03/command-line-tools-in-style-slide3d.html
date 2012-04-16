@@ -78,13 +78,12 @@
 use strict;
 use warnings;
 
-my $mysql = `which mysql`; chomp $mysql;
-my $cmd = "$mysql -BNe 'show databases'";
-open F, $cmd."|";
-while(<F>) {
+my $cmd = "mysql -BNe 'show databases'";
+open my $f, $cmd."|";
+while(<$f>) {
         print;
 }
-close;
+close $f;
 </code></pre>
                 </section>
                 <section>
@@ -96,17 +95,16 @@ use warnings;
 
 my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
 
-my $mysql = `which mysql`; chomp $mysql;
-my $cmd = "$mysql -BNe 'show databases'";
+my $cmd = "mysql -BNe 'show databases'";
 $cmd .= " -u'$user'" if defined $user;
 $cmd .= " -p'$passwd'" if defined $passwd;
 
 print "Launch: $cmd\n";
-open F, $cmd."|";
-while(<F>) {
+open my $f, $cmd."|";
+while(<$f>) {
         print;
 }
-close;
+close $f;
 #launch with mywrapper.pl LOGIN,PASSWD
 </code></pre>
                 </section>
@@ -120,19 +118,18 @@ use warnings;
 my ($user,$passwd) = split(/,/,$ARGV[0]) if @ARGV > 0;
 my $filter = $ARGV[1] if @ARGV > 1;
 
-my $mysql = `which mysql`; chomp $mysql;
-my $cmd = "$mysql -BNe 'show databases'";
+my $cmd = "mysql -BNe 'show databases'";
 $cmd .= " -u'$user'" if defined $user;
 $cmd .= " -p'$passwd'" if defined $passwd;
 
 print "Launch: $cmd\n";
 print "Apply filter: $filter\n" if defined $filter;
-open F, $cmd."|";
-while(<F>) {
+open my $f, $cmd."|";
+while(<$f>) {
         defined $filter and (/$filter/ or next);
             print;
 }
-close;
+close $f;
 #Launch with mywrapper.pl LOGIN,PASSWD FILTER
 </code></pre>
                 </section>
@@ -201,7 +198,7 @@ mywrapperl.pl [-fhpu] [long options...]
                     </p>
 <pre><code>
 $ perl mywrapper.pl -u root -f ^t
-Launch: /usr/local/bin/mysql -BNe 'show databases' -u'root'
+Launch: mysql -BNe 'show databases' -u'root'
 Apply filter: ^t
 test
 </code></pre>
@@ -233,7 +230,7 @@ use warnings;
 sub new {
     my ($proto, %params) = @_; my $class = ref $proto || $proto;
     my $self = \%params;
-    $self->{mysql} //= `which mysql`; chomp $self->{mysql};
+    $self->{mysql} //= 'mysql';
 
     bless $self, $class;
 }
@@ -282,12 +279,12 @@ sub run {
 
     print "Launch: $cmd\n";
     print "Apply filter: $filter\n" if defined $filter;
-    open F, $cmd."|";
-    while(<F>) {
+    open my $f, $cmd."|";
+    while(<$f>) {
         defined $filter and (/$filter/ or next);
         print;
     }
-    close;
+    close $f;
 }
 1;
 </code></pre>
@@ -319,7 +316,7 @@ $wrapper->run();
                 <p>Let's run it :</p>
 <pre><code>
 $ perl MyWrapper.pl --user=root --filter=^t
-Launch: /usr/local/bin/mysql -BNe 'show databases' -u'root'
+Launch: mysql -BNe 'show databases' -u'root'
 Apply filter: ^t
 test
 </code></pre>
@@ -352,8 +349,7 @@ use Moo;
 
 has mysql => ( is => 'rw',
 default => sub {
-    my $mysql = `which mysql`; chomp $mysql;
-    return $mysql;
+    'mysql'
 }
 );
 has user => ( is => 'rw' );
@@ -394,8 +390,7 @@ use MooX::Options;
 #note than I don't use option here, it is not available at command line
 has mysql => ( is => 'rw',
 default => sub {
-    my $mysql = `which mysql`; chomp $mysql;
-    return $mysql;
+    'mysql'
 }
 );
 option user => ( is => 'rw', doc => 'user auth', format => 's' );
