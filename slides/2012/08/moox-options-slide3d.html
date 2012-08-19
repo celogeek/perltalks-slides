@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta charset="utf-8">
+		
+        <title>MooX::Options</title>
+
+		<meta name="description" content="Perl Module MooX::Options">
+		<meta name="author" content="celogeek">
+
+		<link rel="stylesheet" href="css/lato.css" type="text/css">
+		<link rel="stylesheet" href="css/reset.css" type="text/css">
+		<link rel="stylesheet" href="css/main.css" type="text/css">
+		<link rel="stylesheet" href="css/zenburn.css" type="text/css">
+		<link rel="stylesheet" href="css/celogeek.css" type="text/css">
+		
+	</head>
+
+  <body>
+
+	<div id="reveal">
+        <!-- Any section element inside of this container is displayed as a slide -->
+        <div class="slides">
+            <section>
+                <h1 style="margin-left: -100px">
+                    MooX::Options
+                </h1>
+                <script>
+                    // Delicously hacky. Look away.
+                    if( navigator.userAgent.match( /(iPhone|iPad|iPod|Android)/i ) )
+                    document.write( '<p style="color: rgba(0,0,0,0.3); text-shadow: none;">('+'Tap to navigate'+')</p>' );
+                </script>
+                <h3>
+                    Celogeek
+                </h3>
+                <p>
+                    Tue 21 August, 2012
+                </p>
+                <p>
+                    Slides made for YAPC::Europe 2012
+                </p>
+                <p>&nbsp;</p>
+                <img src="images/arrow_right.gif"/>
+            </section>
+
+            <section>
+                <h2>Instructions</h2>
+                <ul>
+                    <li>Press space to see the plan and space again to go the slide.</li>
+                    <li>Use arrow to move between slide (left, right, down, up).</li>
+                    <li>Click on the code area to zoom in, click again to zoom out.</li>
+                </ul>
+                <img src="images/arrow_right.gif"/>
+            </section>
+
+            <section>
+                <h2>
+                    MooX::Options
+                </h2>
+                <div class="centered">
+                    Create easily command line tools with Mo/Moo/Moose.
+                </div>
+                <img src="images/arrow_right.gif"/>
+            </section>
+            <section>
+                <h3>
+                    Example 1: basic usage
+                </h3>
+                <section>
+                    <div>
+                        To create a simple tools you can use MooX::Options in a standalone program :
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                    <pre><code>
+option 'verbose' => (is => 'ro', short => 'v', repeatable => 1);
+                    </code></pre>
+                <p>
+                Download <a href="moox-options-slide3d-demo1.pl">demo1.pl</a>
+                </p>
+                <pre><code>
+$ perl slides/2012/08/moox-options-slide3d-demo1.pl -h
+USAGE: moox-options-slide3d-demo1.pl [-hv] [long options...]
+-v --verbose    no doc for verbose
+-h --help       show this help message
+
+$ perl slides/2012/08/moox-options-slide3d-demo1.pl -v
+I have a tiny voice.
+
+$ perl slides/2012/08/moox-options-slide3d-demo1.pl -vv
+I have a tiny voice.
+Oh wait, I can speak lourder. Boo :)
+
+$ perl slides/2012/08/moox-options-slide3d-demo1.pl -vvv
+I have a tiny voice.
+Oh wait, I can speak louder. Boo :)
+You will regret this. Yahhhhhhhhhhh, I speak too much.
+                </code></pre>
+                </section>
+            </section>
+            <section>
+                <h3>
+                    Example 2: array
+                </h3>
+                <section>
+                    <div>
+                        Fetch list of values
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <pre><code>
+option 'ids' => (is => 'ro', format => 'i', repeatable => 1,
+                 required => 1, autosplit => ',');
+                </code></pre>
+                Download <a href="moox-options-slide3d-demo2.pl">demo2.pl</a>
+                <pre><code>
+$ perl slides/2012/08/moox-options-slide3d-demo2.pl --ids=1 
+$VAR1 = [ 1 ];
+
+$ perl slides/2012/08/moox-options-slide3d-demo2.pl --ids=1 --ids=2
+$VAR1 = [ 1, 2 ];
+
+$ perl slides/2012/08/moox-options-slide3d-demo2.pl --ids=1 --ids=2 --ids=3,4
+$VAR1 = [ 1, 2, 3, 4 ];
+                </code></pre>
+                </section>
+            </section>
+            <section>
+                <h3>
+                    Example 3: pass_through
+                </h3>
+                <section>
+                    <div>
+                        How to use pass_through with MooX::Options
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <pre><code>
+use MooX::Options flavour => [qw( pass_through )], protect_argv => 0;
+option 'output' => (is => 'ro', format => 's', required => 1, short => 'o');
+...
+say Dumper \@ARGV;
+                </code></pre>
+                Download <a href="moox-options-slide3d-demo3.pl">demo3.pl</a>
+                <pre><code>
+$ perl slides/2012/08/moox-options-slide3d-demo3.pl -o my.zip
+Output : my.zip
+$VAR1 = [];
+
+$ perl slides/2012/08/moox-options-slide3d-demo3.pl -o my.zip a b c d
+Output : my.zip
+$VAR1 = [ 'a', 'b', 'c', 'd' ];
+                </code></pre>
+                </section>
+            </section>
+            <section>
+                <h3>
+                    Example 4: Role
+                </h3>
+                <section>
+                    <div>
+                        MooX::Options support the role of Moo, Moose, Role::Tiny.
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <pre><code>
+{package myOutputRole; use strict; use warnings;
+    use Moo::Role;
+    use MooX::Options;
+    option 'output' => (is => 'ro', format => 's', required => 1, short => 'o');
+    1;
+}
+
+{package myVerboseRole; use strict; use warnings;
+ use Moo::Role;
+ use MooX::Options;
+ option 'verbose' => (is => 'ro', short => 'v', repeatable => 1);
+ 1;
+}
+                </code></pre>
+                <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <pre><code>
+{package myOpt; use strict; use warnings;
+use Moo;
+use MooX::Options flavour => [qw( pass_through )], protect_argv => 0;
+with 'myOutputRole', 'myVerboseRole';
+1;
+}
+                </code></pre>
+                Download <a href="moox-options-slide3d-demo4.pl">demo4.pl</a>
+                <pre><code>
+$ perl moox-options-slide3d-demo4.pl -o test.zip -vvv file1 file2 file3
+Output : test.zip
+Verbose: 3
+$VAR1 = [ 'file1', 'file2', 'file3' ];
+                </code></pre>
+                </section>
+            </section>
+            <section>
+                <h3>
+                    Example 5: skip_options
+                </h3>
+                <section>
+                    <div>
+                        You can ignore an option with skip_options. The 'option' keyword will behave like 'has' keyword.
+                    </div>
+                    <img src="images/arrow_down.gif"/>
+                </section>
+                <section>
+                <pre><code>
+{package myOpt; use strict; use warnings;
+use Moo;
+use MooX::Options flavour => [qw( pass_through )]
+                , protect_argv => 0
+                , skip_options => [qw/verbose/];
+with 'myOutputRole', 'myVerboseRole';
+1;
+}
+                </code></pre>
+                Download <a href="moox-options-slide3d-demo5.pl">demo5.pl</a>
+                <pre><code>
+$ perl moox-options-slide3d-demo5.pl -o test.zip -vvv file1 file2 file3
+Output : test.zip
+Verbose: 0
+$VAR1 = [ '-vvv', 'file1', 'file2', 'file3' ];
+                </code></pre>
+                </section>
+            </section>
+
+            <section>
+                <h2>Thanks to</h2>
+                <ul>
+                    <li>Matt (mst) Trout (design and advices)</li>
+                    <li>Tomas (t0m) Doran (help and using it in Message::Passing)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Thank you!</h2>
+                <h3>
+                    Celogeek
+                </h3>
+                <p>
+                    Tue 21 August, 2012
+                </p>
+                <p>
+                    Slides made for YAPC::Europe 2012
+                </p>
+                <ul class="thankyou">
+                    <li><a target="_blank" href="http://sck.to/SM"><img src="images/logo_100x100_idx.png"/>http://www.mongueurs.net/</a></li>
+                    <li><a target="_blank" href="http://blogk.celogeek.com"><img src="images/logo.png"/>http://blog.celogeek.com</a></li>
+                    <li><a target="_blank" href="http://act.yapc.eu/ye2012/"><img/>http://act.yapc.eu/ye2012/</a></li>
+                    <li><a target="_blank" href="http://p3rl.org/MooX::Options"><img/>http://p3rl.org/MooX::Options</a></li>
+                </ul>
+            </section>
+        </div>
+        <!-- The navigational controls UI -->
+        <aside class="controls">
+            <a class="left" href="#">&#x25C4;</a>
+            <a class="right" href="#">&#x25BA;</a>
+            <a class="up" href="#">&#x25B2;</a>
+            <a class="down" href="#">&#x25BC;</a>
+        </aside>
+
+        <!-- Displays presentation progress, max value changes via JS to reflect # of slides -->
+        <div class="progress"><span></span></div>
+        
+    </div>
+		
+    <script src="js/reveal.js"></script>
+    <script src="js/zoom.js"></script>
+    <script src="js/highlight.js"></script>
+    <script>
+        // Parse the query string into a key/value object
+        var query = {};
+        location.search.replace( /[A-Z0-9]+?=(\w*)/gi, function(a) {
+            query[ a.split( '=' ).shift() ] = a.split( '=' ).pop();
+        } );
+
+        Reveal.initialize({
+            // Display controls in the bottom right corner
+            controls: true,
+
+            // Display a presentation progress bar
+            progress: true,
+
+            // If true; each slide will be pushed to the browser history
+            history: true,
+
+            // Flags if mouse wheel navigation should be enabled
+            mouseWheel: true,
+
+            // Apply a 3D roll to links on hover
+            rollingLinks: true,
+
+            // UI style
+            theme: query.theme || 'celogeek', // default/neon
+
+            // Transition style
+            transition: query.transition || 'default' // default/cube/page/concave/linear(2d)
+        });
+
+        hljs.initHighlightingOnLoad();
+
+        document.querySelector( '#reveal' ).addEventListener( 'click', function( event ) {
+            if (event.target.tagName == 'CODE') {
+                event.preventDefault();
+                zoom.magnify({ element: event.target });
+            }
+        } );
+    </script>
+
+    <!-- Piwik --> 
+    <script type="text/javascript">
+        var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.celogeek.fr/" : "http://stats.celogeek.fr/");
+        document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+        </script><script type="text/javascript">
+        try {
+            var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 6);
+            piwikTracker.trackPageView();
+            piwikTracker.enableLinkTracking();
+        } catch( err ) {}
+    </script><noscript><p><img src="http://stats.celogeek.fr/piwik.php?idsite=6" style="border:0" alt="" /></p></noscript>
+    <!-- End Piwik Tracking Code -->
+  </body>
+</html>
